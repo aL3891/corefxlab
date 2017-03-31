@@ -16,13 +16,11 @@ namespace System.IO.Pipelines.Networking.Windows.RIO.Internal
         private RegisteredIO _rio;
         private CancellationToken _token;
         private int _maxThreads;
-
-        private IntPtr _socket;
+        
         private RioThread[] _rioThreads;
 
-        public unsafe RioThreadPool(RegisteredIO rio, IntPtr socket, CancellationToken token)
+        public unsafe RioThreadPool(RegisteredIO rio,  CancellationToken token)
         {
-            _socket = socket;
             _rio = rio;
             _token = token;
 
@@ -54,7 +52,7 @@ namespace System.IO.Pipelines.Networking.Windows.RIO.Internal
                     }
                 };
 
-                IntPtr completionQueue = _rio.RioCreateCompletionQueue(RioTcpServer.MaxOutsandingCompletionsPerThread,
+                IntPtr completionQueue = _rio.RioCreateCompletionQueue(RioSocketPool.MaxOutsandingCompletionsPerThread,
                     completionMethod);
 
                 if (completionQueue == IntPtr.Zero)

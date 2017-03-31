@@ -136,6 +136,9 @@ namespace System.IO.Pipelines.Networking.Windows.RIO.Internal.Winsock
         [DllImport(Ws232, SetLastError = true)]
         public static extern IntPtr accept(IntPtr s, IntPtr addr, int addrlen);
         
+        [DllImport(Ws232, SetLastError = false)]
+        internal static extern int connect([In] IntPtr s, [In] ref SocketAddress name, [In] int namelen);
+
         [DllImport(Ws232)]
         public static extern Int32 WSAGetLastError();
 

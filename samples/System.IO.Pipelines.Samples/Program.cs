@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.IO.Pipelines.Samples.Framing;
-using System.IO.Pipelines.Text.Primitives;
+using System.Reflection;
+using System.Linq;
 
 namespace System.IO.Pipelines.Samples
 {
@@ -16,10 +11,36 @@ namespace System.IO.Pipelines.Samples
     {
         public static void Main(string[] args)
         {
-            // AspNetHttpServerSample.Run();
-            // RawLibuvHttpServerSample.Run();
-            SocketsHttpServerSample.Run();
-            // ProtocolHandling.Run();
+            if (args.Length > 0)
+            {
+                var sampleTypes = typeof(Program).GetTypeInfo().Assembly.GetTypes().Where(t => t.Name.ToLower().StartsWith(args[0].ToLower())).ToList();
+
+                if (sampleTypes.Count == 1)
+                {
+                    var instance = (ISample)Activator.CreateInstance(sampleTypes[0]);
+                    instance.Run().Wait();
+                }
+                else
+                {
+                    Console.WriteLine($"Multiple samples starting with {args[0]} found.");
+                    PrintHelp();
+                }
+            }
+            else
+            {
+                PrintHelp();
+            }
+        }
+
+        private static void PrintHelp()
+        {
+            Console.WriteLine("Supply the start of name of the sample you want to run.");
+            Console.WriteLine("");
+            Console.WriteLine("Available samples:");
+            foreach (var t in typeof(Program).GetTypeInfo().Assembly.GetTypes().Where(t => (typeof(ISample)).IsAssignableFrom(t) && !t.GetTypeInfo().IsAbstract))
+            {
+                Console.WriteLine(t.Name);
+            }
         }
     }
 }

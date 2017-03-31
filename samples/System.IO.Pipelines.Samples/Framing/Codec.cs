@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Formatting;
@@ -13,9 +11,9 @@ using System.IO.Pipelines.Text.Primitives;
 
 namespace System.IO.Pipelines.Samples.Framing
 {
-    public static class ProtocolHandling
+    public  class ProtocolHandling
     {
-        public static void Run()
+        public async Task Run()
         {
             var ip = IPAddress.Any;
             int port = 5000;

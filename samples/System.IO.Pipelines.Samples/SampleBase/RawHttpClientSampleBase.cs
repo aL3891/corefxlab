@@ -2,36 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.IO.Pipelines.Networking.Libuv;
-using System.IO.Pipelines.Text.Primitives;
 using System.Text;
 using System.Text.Formatting;
 
 namespace System.IO.Pipelines.Samples
 {
-    public class RawLibuvHttpClientSample
+    public abstract class RawHttpClientSampleBase : ISample
     {
-        public static async Task Run()
+        public async Task Run()
         {
-            var thread = new UvThread();
-            var client = new UvTcpClient(thread, new IPEndPoint(IPAddress.Loopback, 5000));
-
-            var consoleOutput = thread.PipeFactory.CreateWriter(Console.OpenStandardOutput());
-
-            var connection = await client.ConnectAsync();
+            var consoleOutput = GetPipeFactory().CreateWriter(Console.OpenStandardOutput());
+            var connection = await GetConnection();
 
             while (true)
             {
                 var buffer = connection.Output.Alloc();
-
                 buffer.Append("GET / HTTP/1.1", TextEncoder.Utf8);
                 buffer.Append("\r\n\r\n", TextEncoder.Utf8);
-
                 await buffer.FlushAsync();
 
                 // Write the client output to the console
@@ -40,7 +29,12 @@ namespace System.IO.Pipelines.Samples
                 await Task.Delay(1000);
             }
         }
-        private static async Task CopyCompletedAsync(IPipeReader input, IPipeWriter output)
+
+        protected abstract PipeFactory GetPipeFactory();
+
+        protected abstract Task<IPipeConnection> GetConnection();
+
+        private async Task CopyCompletedAsync(IPipeReader input, IPipeWriter output)
         {
             var result = await input.ReadAsync();
             var inputBuffer = result.Buffer;
@@ -77,6 +71,5 @@ namespace System.IO.Pipelines.Samples
                 inputBuffer = result.Buffer;
             }
         }
-
     }
 }

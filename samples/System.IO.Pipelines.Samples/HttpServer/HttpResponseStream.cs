@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,7 +66,7 @@ namespace System.IO.Pipelines.Samples.Http
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
-            return _connection.WriteAsync(new Span<byte>(buffer, offset, count));
+            return _connection.WriteAsync(buffer, offset, count);
         }
 
         public override void Flush()
