@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO.Pipelines.Text.Primitives;
 using Microsoft.AspNetCore.Hosting.Server;
 using System.Text.Formatting;
 
@@ -168,7 +171,7 @@ namespace System.IO.Pipelines.Samples.Http
             _path = null;
         }
 
-        public async Task WriteAsync(byte[] data, int offset, int count)
+        public Task WriteAsync(Span<byte> data)
         {
             var buffer = _output.Alloc();
 
@@ -179,9 +182,9 @@ namespace System.IO.Pipelines.Samples.Http
 
             if (_autoChunk)
             {
-                buffer.Append(count, TextEncoder.Utf8, 'x');
+                buffer.Append(data.Length, TextEncoder.Utf8, 'x');
                 buffer.Write(_endChunkBytes);
-                buffer.Write(data, offset, count);
+                buffer.Write(data);
                 buffer.Write(_endChunkBytes);
             }
             else

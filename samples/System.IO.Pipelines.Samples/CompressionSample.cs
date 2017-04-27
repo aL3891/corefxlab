@@ -2,16 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.IO.Compression;
 using System.IO.Pipelines.Compression;
 using System.IO.Pipelines.File;
-using System.Threading.Tasks;
 
 namespace System.IO.Pipelines.Samples
 {
-    public class CompressionSample : ISample
+    public class CompressionSample
     {
-        public Task Run()
+        public static void Run()
         {
             using (var factory = new PipeFactory())
             {
@@ -40,8 +41,6 @@ namespace System.IO.Pipelines.Samples
                 input.Complete();
 
                 outputPipe.Writer.Complete();
-
-                return Task.CompletedTask;
             }
         }
     }
