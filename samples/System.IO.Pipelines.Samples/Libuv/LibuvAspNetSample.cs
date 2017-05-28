@@ -6,8 +6,9 @@ using System.Text;
 using System.IO.Pipelines.Samples.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv;
 
 namespace System.IO.Pipelines.Samples
 {
-    public class LibuvAspNetSample : AspNetSampleBase<LibuvHttpServer> { }
+    public class LibuvAspNetSample : AspNetSampleBase<LibuvTransportFactory> { }
 }

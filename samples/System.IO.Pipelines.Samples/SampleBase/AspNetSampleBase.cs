@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions;
 
 namespace System.IO.Pipelines.Samples
 {
-    public abstract class AspNetSampleBase<TServer> : ISample where TServer : IServer, new()
+    public abstract class AspNetSampleBase<TTransportFactory> : ISample where TTransportFactory : class, ITransportFactory
     {
         private static readonly UTF8Encoding _utf8Encoding = new UTF8Encoding(false);
         private static readonly byte[] _helloWorldPayload = Encoding.UTF8.GetBytes("Hello, World!");
@@ -18,26 +20,27 @@ namespace System.IO.Pipelines.Samples
 
         public async Task Run()
         {
-            using (var httpServer = new TServer())
-            {
-                var host = new WebHostBuilder()
-                                    .UseUrls("http://*:5000")
-                                    .UseServer(httpServer)
-                                    .Configure(app =>
+            var host = new WebHostBuilder()
+                                .UseUrls("http://*:5000")
+                                .UseKestrel()
+                                .ConfigureServices(services =>
+                                {
+                                    services.AddSingleton<ITransportFactory, TTransportFactory>();
+                                })
+                                .Configure(app =>
+                                {
+                                    app.Run(context =>
                                     {
-                                        app.Run(context =>
-                                        {
-                                            context.Response.StatusCode = 200;
-                                            context.Response.ContentType = "text/plain";
-                                            // HACK: Setting the Content-Length header manually avoids the cost of serializing the int to a string.
-                                            //       This is instead of: httpContext.Response.ContentLength = _helloWorldPayload.Length;
-                                            context.Response.Headers["Content-Length"] = _helloWorldLength;
-                                            return context.Response.Body.WriteAsync(_helloWorldPayload, 0, _helloWorldPayload.Length);
-                                        });
-                                    })
-                                    .Build();
-                host.Run();
-            }
+                                        context.Response.StatusCode = 200;
+                                        context.Response.ContentType = "text/plain";
+                                        // HACK: Setting the Content-Length header manually avoids the cost of serializing the int to a string.
+                                        //       This is instead of: httpContext.Response.ContentLength = _helloWorldPayload.Length;
+                                        context.Response.Headers["Content-Length"] = _helloWorldLength;
+                                        return context.Response.Body.WriteAsync(_helloWorldPayload, 0, _helloWorldPayload.Length);
+                                    });
+                                })
+                                .Build();
+            host.Run();
 
             Console.ReadLine();
         }

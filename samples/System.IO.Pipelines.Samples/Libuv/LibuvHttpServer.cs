@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using System.IO.Pipelines.Networking.Libuv;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions;
 
 namespace System.IO.Pipelines.Samples.Http
 {
-    public class LibuvHttpServer : HttpServerBase
+    public class LibuvHttpServer : HttpServerBase, ITransportFactory
     {
         private UvTcpListener _uvTcpListener;
         private UvThread _uvThread;
@@ -45,6 +46,11 @@ namespace System.IO.Pipelines.Samples.Http
         {
             var connection = new HttpConnection<TContext>(application, pipeConnection.Input, pipeConnection.Output);
             await connection.ProcessAllRequests();
+        }
+
+        public ITransport Create(IEndPointInformation endPointInformation, IConnectionHandler handler)
+        {
+            return new LibuvTransport();
         }
     }
 }
